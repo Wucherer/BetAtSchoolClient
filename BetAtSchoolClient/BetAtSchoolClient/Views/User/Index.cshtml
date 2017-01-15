@@ -1,0 +1,120 @@
+﻿@using BetAtSchoolClient.Controllers;
+@using BetAtSchoolClient.Models;
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+    ControllerHelper ch = new ControllerHelper();
+    Player currentPlayer = HttpContext.Current.Session["currentPlayer"] as Player;
+    UserGuide guide = HttpContext.Current.Session["currentGuide"] as UserGuide;
+    HttpContext.Current.Session.Add("currentPlayer", currentPlayer);
+}
+<title>Manage User</title>
+<script>
+    function btnStartClick(e)
+    {
+        var msg = $('#msgLogin');
+        var username = $('#txtNickname');
+        var mail = $('#txtEmail');
+      
+        if (username.val() != "")
+        {
+            $.ajax(
+                {
+                    type: 'GET',
+                    url: '@Url.Action("setGame", "User")',
+                    data: {player: username.val(), email: mail.val() },
+                    success: function (result) {
+                        $("#body").html(result);
+                    }
+                });
+        } 
+    }
+    
+
+</script>
+<div id="Login-content" class="demo-section k-content">
+    <p id="currentGuide" class="title">currently logged in: @guide.Username</p>
+    <p id="regGuest" class="title">Register Guest</p>
+   
+    @Html.Kendo().PanelBar().Name("panelRegister").Items(items =>
+{
+
+if (currentPlayer == null)
+{
+    if (Model == null)
+    {
+        items.Add().Text("Nickname of Guest").Expanded(true).Content(@<div>@Html.Kendo().TextBox().Name("txtNickname") <label id="msgUsername">User already exists !</label></div>);
+    }
+    else
+    {
+        items.Add().Text("Nickname of Guest").Expanded(true).Content(@<div>@Html.Kendo().TextBox().Name("txtNickname") <label id="msgUsername"></label></div>);
+    }
+}
+else
+{
+        items.Add().Text("Nickname of Guest").Expanded(true).Content(@<div>@Html.Kendo().TextBox().Name("txtNickname").Enable(true).Value("")<label id="msgUsername"></label></div>);
+
+}
+items.Add().Text("(*) Email").Expanded(true).Content(@<div>@Html.Kendo().TextBox().Name("txtEmail") </div>);
+
+})
+
+    @Html.Kendo().Button().Name("btnStartQuiz").Content("Start Quiz !").Events(e => e.Click("btnStartClick")) <label id="msgLogin"></label>
+    <label id="lblDetail">(*) not needed</label>
+</div>
+
+
+<style>
+  .demo-section {
+        padding: 0;
+
+        width: 40%;
+        margin-top:5%;
+        margin-left:30%;
+    }
+
+    #btnStartQuiz {
+
+        margin-top:10px;
+    }
+
+    #lblDetail {
+        font-size: 10px;
+        margin-top: 15px;   
+    }
+
+    #Login-content .title {
+       font-size: 16px;
+        color: #fff;
+        background-color: #1e88e5;
+        padding: 10px 20px;
+        margin: 0;
+
+        border-top: 3px solid white;
+    }
+
+    #fieldlist {
+        margin: 0 0 -1.5em;
+        padding: 30px;
+    }
+
+        #fieldlist li {
+            list-style: none;
+            padding-bottom: 1.5em;
+        }
+
+        #fieldlist label {
+            display: block;
+            padding-bottom: .6em;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            color: #444;
+        }
+
+
+        #regGuest{
+            border-bottom: 3px solid white;
+        }
+
+</style>

@@ -1,0 +1,56 @@
+﻿@using BetAtSchoolClient.Models;
+@{ 
+    UserGuide currentGuide = null;
+}
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    	<link href="@Url.Content("~/Content/kendo/2016.3.914/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+	<link href="@Url.Content("~/Content/kendo/2016.3.914/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+	<link href="@Url.Content("~/Content/kendo/2016.3.914/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+	<link href="@Url.Content("~/Content/kendo/2016.3.914/kendo.Silver.min.css")" rel="stylesheet" type="text/css" />
+	<link href="@Url.Content("~/Content/kendo/2016.3.914/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+	<script src="@Url.Content("~/Scripts/kendo/2016.3.914/jquery.min.js")"></script>
+	<script src="@Url.Content("~/Scripts/kendo/2016.3.914/angular.min.js")"></script>
+	<script src="@Url.Content("~/Scripts/kendo/2016.3.914/jszip.min.js")"></script>
+	<script src="@Url.Content("~/Scripts/kendo/2016.3.914/kendo.all.min.js")"></script>
+</head>
+    <body>      
+        <header style="margin-bottom: 15px;">
+            <div class="content-wrapper">
+                <div class="float-left">
+                    <p class="site-title"><img src="../../Images/Logo.png" width="60" height="60" />@Html.ActionLink("Bet@School", "Index", "Login")</p>
+                </div>
+                <div class="float-right">
+                    <nav>
+                        <ul id="menu"> 
+                            @if (currentGuide != null)
+                            {
+                                <li style="font-size: 20px">currently Logged in: @currentGuide.Username</li>
+                            }                           
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>
+        
+        <div id="body">
+            @RenderSection("featured", required: false)
+            <section class="content-wrapper main-content clear-fix">
+                  @RenderBody()
+             </section>
+        </div>
+        @if ((HttpContext.Current.Session["passwordWrong"] as string) != "isSet")
+        {
+                <footer>
+                    <div class="content-wrapper">
+                        <div class="float-left">
+                            <p>&copy; @DateTime.Now.Year - David Wucherer, Lukas Kramer, John Tusha</p>
+                        </div>
+                    </div>
+                </footer>
+        }
+    </body>
+</html>

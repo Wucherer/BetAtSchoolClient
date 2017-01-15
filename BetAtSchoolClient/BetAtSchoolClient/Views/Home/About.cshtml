@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "About";
+}
+
+<hgroup class="title">
+    <h1>@ViewBag.Title something</h1>
+  
+</hgroup>
+
+<article>
+    <h3>Bet-at-School</h3>
+    <p>
+        additional Information:
+    </p>
+    <ul id="links-treeview">
+        <li>
+            <div>
+                <p>Diese Anwendung soll die Besucher des TdoT dazu anspornen</p>
+                <p>, sich mehr das Präsentierte genauer zu verinnerlichen.</p>
+            </div>
+        </li>
+</ul>
+</article>
+
+<script>
+    $(function () {
+        $("#links-treeview").kendoTreeView();
+    });
+</script>

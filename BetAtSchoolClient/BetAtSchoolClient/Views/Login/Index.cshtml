@@ -1,0 +1,101 @@
+﻿<script>
+    var anfang = true;
+
+    function btnLoginClick(e) {
+        var Username = $('#txtUsername');
+        var Password = $('#txtPassword');
+        var msgUser = $('#msgUsername');
+        var msgPass = $('#msgPassword');
+        if (Username.val() == "") {
+            msgUser.text("Username not set !");
+            if (Password.val() == "") {
+                msgPass.text("Password not set !");
+            } else {
+                msgPass.text("");
+            }
+        } else {
+            msgUser.text("");
+            if (Password.val() == "") {
+                msgPass.text("Password not set !");
+            } else {
+                msgPass.text("");
+                $.ajax(
+                {
+                    type: 'POST',
+                    url: '@Url.Action("returnUser", "Login")',
+                    data: { username: Username.val(), password: Password.val() },
+                    success: function (result) {
+                            $("#body").html(result);                    
+                    }
+                });
+            }
+    }
+
+    }
+</script>
+@{
+    ViewBag.Title = "Index";
+
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    
+}
+<title>Login</title>
+
+<div id="Login-content" class="demo-section k-content">
+    <p class="title">Login</p>
+    @Html.Kendo().PanelBar().Name("panelLogin").Items(items => {
+        items.Add().Text("Username").Expanded(true).Content(@<div>@Html.Kendo().TextBox().Name("txtUsername") <label id="msgUsername"></label></div>);
+        items.Add().Text("Passwort").Expanded(true).Content(@<div>@Html.Kendo().TextBox().Name("txtPassword").HtmlAttributes(new { type = "password" }) <label id="msgPassword"></label></div>); })
+    @if (Model == null)
+    {
+        Layout = null;
+        HttpContext.Current.Session.Add("passwordWrong", "isSet");
+        @Html.Kendo().Button().Name("btnSumbmit").Content("Login").Events(e => e.Click("btnLoginClick")) <label id="msgLogin">Password or Username not correct !</label>
+    }
+    else
+    {
+       HttpContext.Current.Session.Add("passwordWrong", "notSet");
+       @Html.Kendo().Button().Name("btnSumbmit").Content("Login").Events(e => e.Click("btnLoginClick")) <label id="msgLogin"></label>
+
+    }
+
+   
+
+</div>
+<style>
+    .demo-section {
+        padding: 0;
+    }
+
+    #Login-content .title {
+        font-size: 16px;
+        color: #fff;
+        background-color: #1e88e5;
+        padding: 20px 30px;
+        margin: 0;
+    }
+
+    #msgPassword, #msgUsername, #msgLogin {
+        color: red;
+    }
+
+    #fieldlist {
+        margin: 0 0 -1.5em;
+        padding: 30px;
+    }
+
+        #fieldlist li {
+            list-style: none;
+            padding-bottom: 1.5em;
+        }
+
+        #fieldlist label {
+            display: block;
+            padding-bottom: .6em;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            color: #444;
+        }
+</style>
+

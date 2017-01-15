@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "Contact";
+}
+
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+</hgroup>
+
+<h3>Bet@School - Contacts</h3>
+<br />
+
+    <div id="contacts-tabstrip">
+    <ul>
+        <li>
+            Email
+        </li>
+        <li>
+            Address
+        </li>
+    </ul>
+    <div>
+        <p>
+            <span class="label">David Wucherer: </span>
+            <span><a href="mailto:david.wucherer@gmail.com">david.wucherer@gmail.com</a></span>
+        </p>
+        <p>
+            <span class="label">Lukas Kramer: </span>
+            <span><a href="mailto:lukaskramer@gmx.at">lukaskramer@gmx.at</a></span>
+        </p>
+        <p>
+            <span class="label">John Tusha:</span>
+            <span><a href="mailto:john.tusha@edu.htl-villach.at">john.tusha@edu.htl-villach.at</a></span>
+        </p>
+    </div>
+    <div>
+        <a href="https://portal.htl-villach.at/if/SYP5B2016/Teams/D/_layouts/15/start.aspx#/SitePages/Home.aspx">Our Sharepoint</a></span>
+        
+    </div>
+</div>
+<script>
+    $(function () {
+        $("#contacts-tabstrip").kendoTabStrip();
+    });
+</script>

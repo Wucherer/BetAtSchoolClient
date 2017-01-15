@@ -1,0 +1,413 @@
+﻿@using BetAtSchoolClient.Models;
+@{
+
+    Layout = null;
+
+    int currentQuestions = 0;
+    int currentStation = 0;
+    Player currentPlayer = HttpContext.Current.Session["currentPlayer"] as Player;
+    UserGuide guide = HttpContext.Current.Session["currentGuide"] as UserGuide;
+    string desc = Model[currentStation].Questions[currentQuestions].Description;
+    string stat = Model[currentStation].StationName;
+}
+
+<script>
+    var currQ = 0;
+    var answeredQ = 0;
+    var score = 100;
+
+    $(document).ready(function () {
+        var slider = $("#slider").kendoSlider({
+            increaseButtonTitle: "Right",
+            decreaseButtonTitle: "Left",
+            min: 10,
+            max: score,
+            smallStep: 10,
+            largeStep: 10
+        }).data("kendoSlider");
+    });
+
+    function btnExitClick(e)
+    {
+        var username = $("#currentPlayer").text();
+
+        $.ajax(
+               {
+                   type: 'GET',
+                   url: '@Url.Action("setScoreOffline", "User")',
+                   data: { player: username, score: score },
+                   success: function (result) {
+                       $("#body").html(result);
+                   }
+               });
+    }
+
+    function btnNextClick(e)
+    {
+        if (currQ < 10) {
+            var next = currQ + 1;
+
+            if (next == 10) {
+                $("#btnAnswer").prop("disabled", true);
+                $("#btnNext").prop("disabled", true);
+            }
+
+            document.getElementById(currQ).style.display = 'none';
+            document.getElementById(next).style.display = 'inline';
+            $("#answeredQ").text("You answered " + answeredQ + " from 10 Questions");
+            $("#score").text("Your score is: " + score);
+            currQ = currQ + 1;
+
+            var img = "#img" + (currQ + 1);
+
+            if ($(img).css('display') == 'inline') {
+                $("#btnAnswer").prop("disabled", true);
+            }
+            else {
+                if(next<10)
+                   $("#btnAnswer").prop("disabled", false);
+            }
+        }
+    }
+
+
+    function btnPrevClick(e)
+    {
+            
+        $("#btnNext").prop("disabled", false);
+        
+        if (currQ > 0) {
+            var prev = currQ - 1;
+            document.getElementById(currQ).style.display = 'none';
+            document.getElementById(prev).style.display = 'inline';
+            currQ = currQ - 1;
+        }
+
+        var img = "#img" + (currQ + 1);
+        if ($(img).css('display') == 'inline') {
+            $("#btnAnswer").prop("disabled", true);
+
+        }
+        else {
+            $("#btnAnswer").prop("disabled", false);
+        }
+
+
+    }
+
+    function btnAnswerClick(e)
+    {
+        //check img - if visible => disable answer
+        var img = "#img" + (currQ + 1);
+        var rightAnswer;
+        var value = $("#slider").data("kendoSlider").value();
+
+
+
+        var correctA = "#RA" + currQ;
+        var radio = "#A" + $(correctA).text();
+
+        if ($(radio).is(':checked')) {
+            $(img).attr('src', '../../Images/check_circle.png');
+
+            var quoteId = "#Q" + (currQ + 1);
+            var quoteVal = $(quoteId).text();
+            score = score + (value * quoteVal);
+        } else {
+            score = score - value;
+        }
+
+        $("#btnAnswer").attr("disabled", true);
+
+        score = score + 10;
+
+        var slider = $("#slider").data("kendoSlider");
+        var wrapper = slider.wrapper;
+        var element = slider.element;
+        slider.destroy();
+        wrapper.before(element.show());
+        wrapper.remove();
+
+        var slider = $("#slider").kendoSlider({
+            increaseButtonTitle: "Right",
+            decreaseButtonTitle: "Left",
+            min: 10,
+            max: score,
+            smallStep: 10,
+            largeStep: 10
+        }).data("kendoSlider");
+
+
+
+        $(img).css("display", "inline");
+        answeredQ = answeredQ + 1;
+    }
+</script>
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>QuestionsView</title>
+</head>
+<body>
+    <div>
+
+        <p id="currentPlayer" class="title">currently playing: @currentPlayer.name</p>
+        @Html.Kendo().PanelBar().Name("panelQuestions").Items(items =>
+    {
+        items.Add().Expanded(true).Content(
+            @<div id="Login-content">
+                <div id=0 style="display: inline">
+                    <ul>
+                        <li id="stat1"><h1>Station: @Model[0].StationName</h1></li>
+                        <li id="des1"><h2>@Model[0].Questions[0].Description</h2><img id="img1" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q1" style="display:none">@Model[0].Questions[0].Quote</p><p>Quote for this Question: @Model[0].Questions[0].Quote</p></li>
+                        <li><input type="radio" id="A0" name="A1" class="radio" /> @Model[0].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A1" name="A1" class="radio" /> @Model[0].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A2" name="A1" class="radio" /> @Model[0].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A3" name="A1" class="radio" /> @Model[0].Questions[0].Answers[3].Description</li>
+                        <li id="RA0" style="display: none">@Model[0].Questions[0].CorrectAnswer</li>
+
+                    </ul>
+                </div>
+                <div id=1 style="display: none">
+                    <ul>
+                        <li id="stat2"><h1>@Model[1].StationName</h1></li>
+                        <li id="des2"><h2>@Model[1].Questions[0].Description</h2><img id="img2" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q2" style="display:none">@Model[1].Questions[0].Quote</p><p>Quote for this Question: @Model[1].Questions[0].Quote</p></li>
+                        <li><input type="radio" id="A4" name="A1" class="radio" /> @Model[1].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A5" name="A1" class="radio" /> @Model[1].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A6" name="A1" class="radio" /> @Model[1].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A7" name="A1" class="radio" /> @Model[1].Questions[0].Answers[3].Description</li>
+                        <li id="RA1" style="display: none">@Model[1].Questions[0].CorrectAnswer</li>
+
+                    </ul>
+                </div>
+                <div id=2 style="display: none">
+                    <ul>
+                        <li id="stat3"><h1>@Model[2].StationName</h1></li>
+                        <li id="des3"><h2>@Model[2].Questions[0].Description</h2><img id="img3" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q3" style="display:none">@Model[2].Questions[0].Quote</p><p>Quote for this Question: @Model[2].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A8" name="A1" class="radio" /> @Model[2].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A9" name="A1" class="radio" /> @Model[2].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A10" name="A1" class="radio" /> @Model[2].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A11" name="A1" class="radio" /> @Model[2].Questions[0].Answers[3].Description</li>
+                        <li id="RA2" style="display: none">@Model[2].Questions[0].CorrectAnswer</li>
+
+                    </ul>
+                </div>
+                <div id=3 style="display: none">
+                    <ul>
+                        <li id="stat4"><h1>@Model[3].StationName</h1></li>
+                        <li id="des4"><h2>@Model[3].Questions[0].Description</h2><img id="img4" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q4" style="display:none">@Model[3].Questions[0].Quote</p> <p>Quote for this Question: @Model[3].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A12" name="A1" class="radio" /> @Model[3].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A13" name="A1" class="radio" /> @Model[3].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A14" name="A1" class="radio" /> @Model[3].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A15" name="A1" class="radio" /> @Model[3].Questions[0].Answers[3].Description</li>
+                        <li id="RA3" style="display: none">@Model[3].Questions[0].CorrectAnswer</li>
+                    </ul>
+                </div>
+                <div id=4 style="display: none">
+                    <ul>
+                        <li id="stat5"><h1>@Model[4].StationName</h1></li>
+                        <li id="des5"><h2>@Model[4].Questions[0].Description</h2><img id="img5" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q5" style="display:none">@Model[4].Questions[0].Quote</p><p>Quote for this Question: @Model[4].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A16" name="A1" class="radio" /> @Model[4].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A17" name="A1" class="radio" /> @Model[4].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A18" name="A1" class="radio" /> @Model[4].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A19" name="A1" class="radio" /> @Model[4].Questions[0].Answers[3].Description</li>
+                        <li id="RA4" style="display: none">@Model[4].Questions[0].CorrectAnswer</li>
+                    </ul>
+                </div>
+                <div id=5 style="display: none">
+                    <ul>
+                        <li id="stat6"><h1>@Model[5].StationName</h1></li>
+                        <li id="des6"><h2>@Model[5].Questions[0].Description</h2><img id="img6" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q6" style="display:none">@Model[5].Questions[0].Quote</p><p>Quote for this Question: @Model[5].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A20" name="A1" class="radio" /> @Model[5].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A21" name="A1" class="radio" /> @Model[5].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A22" name="A1" class="radio" /> @Model[5].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A23" name="A1" class="radio" /> @Model[5].Questions[0].Answers[3].Description</li>
+                        <li id="RA5" style="display: none">@Model[5].Questions[0].CorrectAnswer</li>
+                    </ul>
+                </div>
+                <div id=6 style="display: none">
+                    <ul>
+                        <li id="stat7"><h1>@Model[6].StationName</h1></li>
+                        <li id="des7"><h2>@Model[6].Questions[0].Description</h2><img id="img7" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q7" style="display:none">@Model[6].Questions[0].Quote</p> <p>Quote for this Question: @Model[6].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A24" name="A1" class="radio" /> @Model[6].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A25" name="A1" class="radio" /> @Model[6].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A26" name="A1" class="radio" /> @Model[6].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A27" name="A1" class="radio" /> @Model[6].Questions[0].Answers[3].Description</li>
+                        <li id="RA6" style="display: none">@Model[6].Questions[0].CorrectAnswer</li>
+                    </ul>
+                </div>
+                <div id=7 style="display: none">
+                    <ul>
+                        <li id="stat8"><h1>@Model[7].StationName</h1></li>
+                        <li id="des8"><h2>@Model[7].Questions[0].Description</h2><img id="img8" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q8" style="display:none">@Model[7].Questions[0].Quote</p><p>Quote for this Question: @Model[7].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A28" name="A1" class="radio" /> @Model[7].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A29" name="A1" class="radio" /> @Model[7].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A30" name="A1" class="radio" /> @Model[7].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A31" name="A1" class="radio" /> @Model[7].Questions[0].Answers[3].Description</li>
+                        <li id="RA7" style="display: none">@Model[7].Questions[0].CorrectAnswer</li>
+                    </ul>
+                </div>
+                <div id=8 style="display: none">
+                    <ul>
+                        <li id="stat9"><h1>@Model[8].StationName</h1></li>
+                        <li id="des9"><h2>@Model[8].Questions[0].Description</h2><img id="img9" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q9" style="display:none">@Model[8].Questions[0].Quote</p><p>Quote for this Question: @Model[8].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A32" name="A1" class="radio" /> @Model[8].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A33" name="A1" class="radio" /> @Model[8].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A34" name="A1" class="radio" /> @Model[8].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A35" name="A1" class="radio" /> @Model[8].Questions[0].Answers[3].Description</li>
+                        <li id="RA8" style="display: none">@Model[8].Questions[0].CorrectAnswer</li>
+                    </ul>
+                </div>
+                <div id=9 style="display: none">
+                    <ul>
+                        <li id="stat10"><h1>@Model[9].StationName</h1></li>
+                        <li id="des10"><h2>@Model[9].Questions[0].Description</h2><img id="img10" src="../../Images/wrong.png" width="30" height="30" style="display: none" /><p id="Q10" style="display:none">@Model[9].Questions[0].Quote</p><p>Quote for this Question: @Model[9].Questions[0].Quote</p></li>
+
+                        <li><input type="radio" id="A36" name="A1" class="radio" /> @Model[9].Questions[0].Answers[0].Description</li>
+                        <li><input type="radio" id="A37" name="A1" class="radio" /> @Model[9].Questions[0].Answers[1].Description</li>
+                        <li><input type="radio" id="A38" name="A1" class="radio" /> @Model[9].Questions[0].Answers[2].Description</li>
+                        <li><input type="radio" id="A39" name="A1" class="radio" /> @Model[9].Questions[0].Answers[3].Description</li>
+                        <li id="RA9" style="display: none">@Model[9].Questions[0].CorrectAnswer</li>
+                    </ul>
+                </div>
+                <div id=10 style="display: none">
+                    <ul>
+                        <li><h1 style="margin-top:50px;" id="answeredQ"></h1></li>
+                        <li><h1 style="margin-bottom:50px;"id="score"></h1></li>
+                        <li></li>
+                    </ul>
+                </div>
+            </div>
+     );
+    })
+
+        <input id="slider" class="balSlider" value="0" />
+        <br />
+        <p id="msgSlider" style="visibility: hidden; color: red">too much !</p>
+        <div id="buttons">
+            @Html.Kendo().Button().Name("btnPrev").Events(e => e.Click("btnPrevClick")).Content("Back")
+            @Html.Kendo().Button().Name("btnAnswer").Events(e => e.Click("btnAnswerClick")).Content("Answer")
+            @Html.Kendo().Button().Name("btnNext").Events(e => e.Click("btnNextClick")).Content("Next")
+            @Html.Kendo().Button().Name("btnBeenden").Events(e => e.Click("btnExitClick")).Content("Beenden")
+        </div>
+    </div>
+
+</body>
+</html>
+<style>
+    .demo-section {
+        text-align: center;
+    }
+
+    .title {
+        font-size: 16px;
+        color: #fff;
+        background-color: #1e88e5;
+        padding: 10px 20px;
+        margin: 0;
+    }
+
+    .radio {
+        width: 20px;
+        height: 20px;
+        margin-top:20px;
+        margin-bottom:20px;
+        
+    }
+
+    #Login-content {
+    }
+
+    div.balSlider {
+        width: 100%;
+    }
+
+        div.balSlider .k-slider-selection {
+            display: none;
+        }
+
+    .demo-section {
+        padding: 0;
+        width: 40%;
+        margin-top: 5%;
+        margin-left: 30%;
+        text-align: center;
+    }
+
+    ul {
+        margin-left: 35%;
+    }
+
+    li {
+        list-style-type: none;
+        padding:2px;
+    }
+
+    #buttons {
+        text-align: center;
+    }
+
+    #k-radio-label {
+        margin-left: 10px;
+    }
+
+    #btnAnswer, #btnNext, #btnPrev {
+        margin-top: 15px;
+        margin-left:10px;
+        margin-right:10px;
+    }
+
+    #btnBeenden{
+        float: right;
+    }
+
+    #Login-content .title {
+        font-size: 16px;
+        color: #fff;
+        background-color: #1e88e5;
+        padding: 20px 30px;
+        margin: 0;
+    }
+
+    #fieldlist {
+        list-style: none;
+        padding: 30px;
+    }
+
+        #fieldlist li {
+            list-style: none;
+            padding-bottom: 1.5em;
+        }
+
+        #fieldlist label {
+            list-style: none;
+            display: block;
+            padding-bottom: .6em;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            color: #444;
+        }
+
+
+    div.balSlider {
+        width: 90%;
+        margin-top: 20px;
+        margin-left: 5%;
+    }
+
+        div.balSlider .k-slider-selection {
+            display: none;
+        }
+       
+</style>
