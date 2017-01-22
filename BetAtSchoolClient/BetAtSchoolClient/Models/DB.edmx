@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="BetAtSchoolDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Answers">
+          <Key>
+            <PropertyRef Name="Answer_ID" />
+          </Key>
+          <Property Name="Answer_ID" Type="int" Nullable="false" />
+          <Property Name="Answer_Desc" Type="varchar" MaxLength="50" />
+          <Property Name="Question_ID" Type="int" />
+          <Property Name="isRichtig" Type="int" />
+        </EntityType>
+        <EntityType Name="isAdmin">
+          <Key>
+            <PropertyRef Name="Username" />
+          </Key>
+          <Property Name="Username" Type="varchar" MaxLength="30" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Questions">
+          <Key>
+            <PropertyRef Name="Question_ID" />
+          </Key>
+          <Property Name="Question_ID" Type="int" Nullable="false" />
+          <Property Name="Question_Desc" Type="varchar" MaxLength="50" />
+          <Property Name="Station_Id" Type="int" />
+          <Property Name="Quote" Type="decimal" Precision="18" Scale="0" />
+        </EntityType>
+        <EntityType Name="Stations">
+          <Key>
+            <PropertyRef Name="Station_ID" />
+          </Key>
+          <Property Name="Station_ID" Type="int" Nullable="false" />
+          <Property Name="Stationname" Type="varchar" MaxLength="40" />
+        </EntityType>
+        <EntityType Name="USERTDOT">
+          <Key>
+            <PropertyRef Name="Username" />
+          </Key>
+          <Property Name="Username" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Credit" Type="int" />
+          <Property Name="Email" Type="varchar" MaxLength="60" />
+        </EntityType>
+        <Association Name="fk_AnswersQuestions">
+          <End Role="Questions" Type="Self.Questions" Multiplicity="0..1" />
+          <End Role="Answers" Type="Self.Answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Questions">
+              <PropertyRef Name="Question_ID" />
+            </Principal>
+            <Dependent Role="Answers">
+              <PropertyRef Name="Question_ID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_QuestionsStations">
+          <End Role="Stations" Type="Self.Stations" Multiplicity="0..1" />
+          <End Role="Questions" Type="Self.Questions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Stations">
+              <PropertyRef Name="Station_ID" />
+            </Principal>
+            <Dependent Role="Questions">
+              <PropertyRef Name="Station_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="BetAtSchoolDBModelStoreContainer">
+          <EntitySet Name="Answers" EntityType="Self.Answers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="isAdmin" EntityType="Self.isAdmin" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Questions" EntityType="Self.Questions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Stations" EntityType="Self.Stations" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="USERTDOT" EntityType="Self.USERTDOT" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="fk_AnswersQuestions" Association="Self.fk_AnswersQuestions">
+            <End Role="Questions" EntitySet="Questions" />
+            <End Role="Answers" EntitySet="Answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_QuestionsStations" Association="Self.fk_QuestionsStations">
+            <End Role="Stations" EntitySet="Stations" />
+            <End Role="Questions" EntitySet="Questions" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="BetAtSchoolDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Answers">
+          <Key>
+            <PropertyRef Name="Answer_ID" />
+          </Key>
+          <Property Name="Answer_ID" Type="Int32" Nullable="false" />
+          <Property Name="Answer_Desc" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Question_ID" Type="Int32" />
+          <Property Name="isRichtig" Type="Int32" />
+          <NavigationProperty Name="Questions" Relationship="Self.fk_AnswersQuestions" FromRole="Answers" ToRole="Questions" />
+        </EntityType>
+        <EntityType Name="isAdmin">
+          <Key>
+            <PropertyRef Name="Username" />
+          </Key>
+          <Property Name="Username" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Questions">
+          <Key>
+            <PropertyRef Name="Question_ID" />
+          </Key>
+          <Property Name="Question_ID" Type="Int32" Nullable="false" />
+          <Property Name="Question_Desc" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Station_Id" Type="Int32" />
+          <Property Name="Quote" Type="Decimal" Precision="18" Scale="0" />
+          <NavigationProperty Name="Answers" Relationship="Self.fk_AnswersQuestions" FromRole="Questions" ToRole="Answers" />
+          <NavigationProperty Name="Stations" Relationship="Self.fk_QuestionsStations" FromRole="Questions" ToRole="Stations" />
+        </EntityType>
+        <EntityType Name="Stations">
+          <Key>
+            <PropertyRef Name="Station_ID" />
+          </Key>
+          <Property Name="Station_ID" Type="Int32" Nullable="false" />
+          <Property Name="Stationname" Type="String" MaxLength="40" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Questions" Relationship="Self.fk_QuestionsStations" FromRole="Stations" ToRole="Questions" />
+        </EntityType>
+        <EntityType Name="USERTDOT">
+          <Key>
+            <PropertyRef Name="Username" />
+          </Key>
+          <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Credit" Type="Int32" />
+          <Property Name="Email" Type="String" MaxLength="60" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <Association Name="fk_AnswersQuestions">
+          <End Role="Questions" Type="Self.Questions" Multiplicity="0..1" />
+          <End Role="Answers" Type="Self.Answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Questions">
+              <PropertyRef Name="Question_ID" />
+            </Principal>
+            <Dependent Role="Answers">
+              <PropertyRef Name="Question_ID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_QuestionsStations">
+          <End Role="Stations" Type="Self.Stations" Multiplicity="0..1" />
+          <End Role="Questions" Type="Self.Questions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Stations">
+              <PropertyRef Name="Station_ID" />
+            </Principal>
+            <Dependent Role="Questions">
+              <PropertyRef Name="Station_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="BetAtSchoolDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Answers" EntityType="Self.Answers" />
+          <EntitySet Name="isAdmin" EntityType="Self.isAdmin" />
+          <EntitySet Name="Questions" EntityType="Self.Questions" />
+          <EntitySet Name="Stations" EntityType="Self.Stations" />
+          <EntitySet Name="USERTDOT" EntityType="Self.USERTDOT" />
+          <AssociationSet Name="fk_AnswersQuestions" Association="Self.fk_AnswersQuestions">
+            <End Role="Questions" EntitySet="Questions" />
+            <End Role="Answers" EntitySet="Answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_QuestionsStations" Association="Self.fk_QuestionsStations">
+            <End Role="Stations" EntitySet="Stations" />
+            <End Role="Questions" EntitySet="Questions" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="BetAtSchoolDBModelStoreContainer" CdmEntityContainer="BetAtSchoolDBEntities">
+          <EntitySetMapping Name="Answers">
+            <EntityTypeMapping TypeName="BetAtSchoolDBModel.Answers">
+              <MappingFragment StoreEntitySet="Answers">
+                <ScalarProperty Name="Answer_ID" ColumnName="Answer_ID" />
+                <ScalarProperty Name="Answer_Desc" ColumnName="Answer_Desc" />
+                <ScalarProperty Name="Question_ID" ColumnName="Question_ID" />
+                <ScalarProperty Name="isRichtig" ColumnName="isRichtig" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="isAdmin">
+            <EntityTypeMapping TypeName="BetAtSchoolDBModel.isAdmin">
+              <MappingFragment StoreEntitySet="isAdmin">
+                <ScalarProperty Name="Username" ColumnName="Username" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Questions">
+            <EntityTypeMapping TypeName="BetAtSchoolDBModel.Questions">
+              <MappingFragment StoreEntitySet="Questions">
+                <ScalarProperty Name="Question_ID" ColumnName="Question_ID" />
+                <ScalarProperty Name="Question_Desc" ColumnName="Question_Desc" />
+                <ScalarProperty Name="Station_Id" ColumnName="Station_Id" />
+                <ScalarProperty Name="Quote" ColumnName="Quote" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Stations">
+            <EntityTypeMapping TypeName="BetAtSchoolDBModel.Stations">
+              <MappingFragment StoreEntitySet="Stations">
+                <ScalarProperty Name="Station_ID" ColumnName="Station_ID" />
+                <ScalarProperty Name="Stationname" ColumnName="Stationname" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="USERTDOT">
+            <EntityTypeMapping TypeName="BetAtSchoolDBModel.USERTDOT">
+              <MappingFragment StoreEntitySet="USERTDOT">
+                <ScalarProperty Name="Username" ColumnName="Username" />
+                <ScalarProperty Name="Credit" ColumnName="Credit" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

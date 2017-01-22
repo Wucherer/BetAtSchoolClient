@@ -15,6 +15,9 @@ namespace BetAtSchoolClient.Models
             AId = i;
             Description = s;
         }
+        public Answer()
+        {
+        }
     }
 }
 

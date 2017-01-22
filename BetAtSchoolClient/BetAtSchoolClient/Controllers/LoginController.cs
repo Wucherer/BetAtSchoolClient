@@ -33,7 +33,14 @@ namespace BetAtSchoolClient.Controllers
                     {
                         return RedirectToAction("Index", "Admin");
                     } else {
-                        s = "../User/Index";
+                        if (HttpContext.Session["exception"] != null)
+                        {
+                            s = "../Login/Index";
+                        }
+                        else
+                        {
+                            s = "../User/Index";
+                        }
                     }
                 }
                 else
@@ -41,7 +48,7 @@ namespace BetAtSchoolClient.Controllers
                     s = "../Login/Index";
                 }
             
-
+                
             return View(s, u);
         }
     }

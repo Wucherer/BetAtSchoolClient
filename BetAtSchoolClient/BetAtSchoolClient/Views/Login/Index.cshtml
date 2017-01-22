@@ -1,4 +1,16 @@
-﻿<script>
+﻿@{ 
+    List<string> ex = new List<string>();
+    if((HttpContext.Current.Session["exception"] as List<string>) != null)
+    {
+        ex = HttpContext.Current.Session["exception"] as List<string>;
+    }
+    else
+    {
+        ex.Add("no ex");
+    }
+}
+
+<script>
     var anfang = true;
 
     function btnLoginClick(e) {
@@ -58,8 +70,6 @@
        @Html.Kendo().Button().Name("btnSumbmit").Content("Login").Events(e => e.Click("btnLoginClick")) <label id="msgLogin"></label>
 
     }
-
-   
 
 </div>
 <style>

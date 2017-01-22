@@ -1,10 +1,14 @@
 ﻿using BetAtSchoolClient.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.OleDb;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Web;
+using System.Data;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Core.Objects;
 
 namespace BetAtSchoolClient.Controllers
 {
@@ -18,16 +22,17 @@ namespace BetAtSchoolClient.Controllers
         public UserGuide getUser(string user, string pw)
         {
             UserGuide ug = null;
-            
-            using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, "192.168.128.253", "OU=EDVO,OU=Schueler,OU=Benutzer,DC=htl-vil,DC=local"))
-            {
-                // validate the credentials
-                if(pc.ValidateCredentials(user, pw) || (user=="s"&&pw=="s"))
+           /*
+                using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, "192.168.128.253", "OU=EDVO,OU=Schueler,OU=Benutzer,DC=htl-vil,DC=local"))
                 {
-                    ug = new UserGuide(user, pw);
-                }
-            }
-            //ug = new UserGuide(user, pw);
+                    // validate the credentials
+                    if (pc.ValidateCredentials(user, pw) || (user == "s" && pw == "s"))
+                    {
+                        ug = new UserGuide(user, pw);
+                    }
+                }*/
+          
+            ug = new UserGuide(user, pw);
             return ug;
         }
 
@@ -54,67 +59,45 @@ namespace BetAtSchoolClient.Controllers
 
             List<Station> stations = new List<Station>();
             string connectionString = cs;
-            using (OleDbConnection oleDbConnection = new OleDbConnection(connectionString))
-            {
-                OleDbCommand oleDbCommand = new OleDbCommand("select * from station");
-                oleDbConnection.Open();
-                oleDbCommand.Connection = oleDbConnection;
-                OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
 
-                while (oleDbDataReader.Read())
+            using (BetAtSchoolDBEntities context = new BetAtSchoolDBEntities())
+            {
+                var stationsDb = context.Stations.ToList();
+
+                for(int i = 0; i < stationsDb.Count; i++)
                 {
-                    int id = (int)oleDbDataReader.GetDecimal(0);
-                    string sname = (string)oleDbDataReader.GetString(1);
-                    Station s = new Station(sname, id);
+                    Station s = new Station();
+
+                    s.StationName = stationsDb[i].Stationname;
+                    s.StationID = stationsDb[i].Station_ID;
+
+                    List<Question> qList = new List<Question>();
+
+                    foreach(Questions q in stationsDb[i].Questions)
+                    {
+                        Question q1 = new Question();
+                        q1.QId = q.Question_ID;
+                        q1.Description = q.Question_Desc;
+                        q1.Quote = (decimal)q.Quote;
+                        q1.Answers = new List<Answer>();
+
+                        foreach(Answers a in q.Answers)
+                        {
+                            Answer a1 = new Answer();
+
+                            a1.AId = a.Answer_ID;
+                            a1.Description = a.Answer_Desc;
+
+                            if (a.isRichtig == 1)
+                                q1.CorrectAnswer = a1.AId;
+
+                            q1.Answers.Add(a1);
+                        }
+                        qList.Add(q1);
+                    }
+                    s.Questions = qList;
                     stations.Add(s);
                 }
-            }
-
-            foreach (Station s in stations)
-            {
-                using (OleDbConnection oleDbConnection = new OleDbConnection(connectionString))
-                {
-                    OleDbCommand oleDbCommand = new OleDbCommand("select * from question where question.station_id = ?");
-                    oleDbCommand.Parameters.Add("?", s.StationID);
-                    oleDbConnection.Open();
-                    oleDbCommand.Connection = oleDbConnection;
-                    OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
-
-                    while (oleDbDataReader.Read())
-                    {
-                        Question q = null;
-                        int qid = (int)oleDbDataReader.GetDecimal(0);
-                        string desc = (string)oleDbDataReader.GetString(1);
-                        int quote = (int)oleDbDataReader.GetDecimal(3);
-                        q = new Question(qid, desc, quote, -1);
-                        s.Questions.Add(q);
-                    }
-                }
-                foreach (Question q in s.Questions)
-                {
-                    using (OleDbConnection oleDbConnection = new OleDbConnection(connectionString))
-                    {
-                        OleDbCommand oleDbCommand = new OleDbCommand("select * from answer where quest_id = ?");
-                        oleDbCommand.Parameters.Add("?", q.QId);
-                        oleDbConnection.Open();
-                        oleDbCommand.Connection = oleDbConnection;
-                        OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
-
-                        while (oleDbDataReader.Read())
-                        {
-                            Answer a = null;
-                            int aid = (int)oleDbDataReader.GetDecimal(0);
-                            string desc = (string)oleDbDataReader.GetString(1);
-                            int corr = (int)oleDbDataReader.GetDecimal(3);
-
-                            if (corr == 1)
-                                q.CorrectAnswer = aid;
-                            a = new Answer(aid, desc);
-                            q.Answers.Add(a);
-                        }
-                    }
-                }
-
             }
 
             Allstations = stations;
@@ -123,51 +106,74 @@ namespace BetAtSchoolClient.Controllers
 
         public void setScore(string name, decimal score)
         {
-            using (var connection = new OleDbConnection(cs))
+ 
+            using (BetAtSchoolDBEntities context = new BetAtSchoolDBEntities())
             {
-                connection.Open();
+                context.USERTDOT.Where(x => x.Username == name.Trim()).ToList().FirstOrDefault().Credit = (int)score;
 
-                var command = connection.CreateCommand();
-                command.CommandText =
-                    "UPDATE USERTDOT SET CREDIT = ? WHERE USERNAME = ?";
-
-                var p1 = command.CreateParameter();
-                p1.Value = score;
-                command.Parameters.Add(p1);
-
-                var p2 = command.CreateParameter();
-                p2.Value = name.Trim();
-                command.Parameters.Add(p2);
-
-                command.ExecuteNonQuery();
+                context.SaveChanges();
             }
-        }
+
         
+        }
+
+
+        public void RefreshAll()
+        {
+            // Get all objects in statemanager with entityKey
+            // (context.Refresh will throw an exception otherwise)
+            
+        }
+
         public bool isAdmin(string username)
         {
             bool ret = false;
-            using (OleDbConnection oleDbConnection = new OleDbConnection(cs))
-            {
 
-                OleDbCommand oleDbCommand = new OleDbCommand("select count(*) from admins where username = ?");
-                oleDbCommand.Parameters.Add("?", username);
-                oleDbConnection.Open();
-                oleDbCommand.Connection = oleDbConnection;
-                OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
-                int count = 5;
-                while (oleDbDataReader.Read())
-                {
-                    count = (int)oleDbDataReader.GetDecimal(0);
-                }
-                if (count == 1)
-                    ret = true;
+            using (BetAtSchoolDBEntities context = new BetAtSchoolDBEntities())
+            {
+                if (context.isAdmin.Where(x => x.Username == username).ToList().Count > 0)
+                    ret = true;         
             }
-            return ret;
+
+
+                /*  using (OleDbConnection oleDbConnection = new OleDbConnection(cs))
+                  {
+
+                      OleDbCommand oleDbCommand = new OleDbCommand("select count(*) from admins where username = ?");
+                      oleDbCommand.Parameters.Add("?", username);
+                      oleDbConnection.Open();
+                      oleDbCommand.Connection = oleDbConnection;
+                      OleDbDataReader oleDbDataReader = oleDbCommand.ExecuteReader();
+                      int count = 5;
+                      while (oleDbDataReader.Read())
+                      {
+                          count = (int)oleDbDataReader.GetDecimal(0);
+                      }
+                      if (count == 1)
+                          ret = true;
+                  }
+              }*/
+                return ret;
         }
 
         public List<Player> getAllUser()
         {
             List<Player> players = new List<Player>();
+
+            using (BetAtSchoolDBEntities context = new BetAtSchoolDBEntities())
+            {
+                var temp = context.USERTDOT.ToList();
+
+                for(int i = 0; i < temp.Count; i++)
+                {
+                    Player p = new Player();
+                    p.credit = (decimal) temp[i].Credit;
+                    p.name = temp[i].Username;
+                    p.email = temp[i].Email;
+                    players.Add(p);
+                }
+            }
+            /*
             using (OleDbConnection oleDbConnection = new OleDbConnection(cs))
             {
                 OleDbCommand oleDbCommand = new OleDbCommand("select * from Usertdot ORDER BY Credit desc");
@@ -179,12 +185,14 @@ namespace BetAtSchoolClient.Controllers
                 {
                     string pname = (string)oleDbDataReader.GetString(0);
                     int score = (int)oleDbDataReader.GetDecimal(1);
-                   // string mail = (string)oleDbDataReader.GetString(2);
+                    // string mail = (string)oleDbDataReader.GetString(2);
 
                     Player s = new Player(pname, score, "none");
                     players.Add(s);
                 }
-            }
+            }*/
+            players.OrderBy(i => i.credit);
+
             return players;
         }
 
@@ -200,8 +208,14 @@ namespace BetAtSchoolClient.Controllers
 
         public bool checkIfUserExists(string user)
         {
-            int c = -1;
+           
             bool userAlreadyExists = false;
+            using (BetAtSchoolDBEntities context = new BetAtSchoolDBEntities())
+            {
+                if (context.USERTDOT.Where(x => x.Username == user).ToList().Count > 0)
+                    userAlreadyExists = true;
+            }
+            /*
             using (OleDbConnection oleDbConnection = new OleDbConnection(cs))
             {
                 OleDbCommand oleDbCommand = new OleDbCommand("select count(*) from USERTDOT where username = ?");
@@ -215,28 +229,40 @@ namespace BetAtSchoolClient.Controllers
                     c = (int)oleDbDataReader.GetDecimal(0);
                 }
 
-                if(c>0)
+                if (c > 0)
                 {
                     userAlreadyExists = true;
                 }
 
-            }
+            }*/
 
             return userAlreadyExists;
         }
 
         public void InsertUserInDB(string user, string email)
         {
-            using (OleDbConnection oleConn = new OleDbConnection(cs))
+            using(BetAtSchoolDBEntities context = new BetAtSchoolDBEntities())
             {
-                OleDbCommand oledbcommand = new OleDbCommand("INSERT INTO USERTDOT VALUES(?, ?, ?)");
-                oledbcommand.Parameters.Add("?", user);
-                oledbcommand.Parameters.Add("?", 100);
-                oledbcommand.Parameters.Add("?", email);
-                oleConn.Open();
-                oledbcommand.Connection = oleConn;
-                oledbcommand.ExecuteNonQuery();
+                USERTDOT usertdot = new USERTDOT();
+                usertdot.Credit = 100;
+                usertdot.Email = email;
+                usertdot.Username = user;
+
+                context.USERTDOT.Add(usertdot);
+
+                context.SaveChanges();
             }
+            /*
+                using (OleDbConnection oleConn = new OleDbConnection(cs))
+                {
+                    OleDbCommand oledbcommand = new OleDbCommand("INSERT INTO USERTDOT VALUES(?, ?, ?)");
+                    oledbcommand.Parameters.Add("?", user);
+                    oledbcommand.Parameters.Add("?", 100);
+                    oledbcommand.Parameters.Add("?", email);
+                    oleConn.Open();
+                    oledbcommand.Connection = oleConn;
+                    oledbcommand.ExecuteNonQuery();
+                }*/
         }
     }
 }
