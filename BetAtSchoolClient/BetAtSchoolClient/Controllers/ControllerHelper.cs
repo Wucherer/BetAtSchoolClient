@@ -117,14 +117,6 @@ namespace BetAtSchoolClient.Controllers
         
         }
 
-
-        public void RefreshAll()
-        {
-            // Get all objects in statemanager with entityKey
-            // (context.Refresh will throw an exception otherwise)
-            
-        }
-
         public bool isAdmin(string username)
         {
             bool ret = false;
@@ -170,6 +162,7 @@ namespace BetAtSchoolClient.Controllers
                     p.credit = (decimal) temp[i].Credit;
                     p.name = temp[i].Username;
                     p.email = temp[i].Email;
+                    p.StartZeit = temp[i].StartZeit;
                     players.Add(p);
                 }
             }
@@ -247,6 +240,7 @@ namespace BetAtSchoolClient.Controllers
                 usertdot.Credit = 100;
                 usertdot.Email = email;
                 usertdot.Username = user;
+                usertdot.StartZeit = DateTime.Now.ToShortTimeString();
 
                 context.USERTDOT.Add(usertdot);
 

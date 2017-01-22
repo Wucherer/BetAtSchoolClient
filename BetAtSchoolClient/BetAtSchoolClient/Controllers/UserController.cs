@@ -61,7 +61,7 @@ namespace BetAtSchoolClient.Controllers
             if(ch.checkIfUserExists(player) != true)
             {
                 if (email == null) email = "default";
-                Player p = new Player(player, 100, email); 
+                Player p = new Player(player, 100, email, DateTime.Now.ToShortTimeString()); 
                 HttpContext.Session.Add("currentPlayer", p);
                 ch.InsertUserInDB(player, email);
                 return RedirectToAction("QuestionView", "User");

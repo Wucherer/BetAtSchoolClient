@@ -28,10 +28,11 @@ CREATE TABLE dbo.Answers(
 		REFERENCES [BetAtSchoolDB].[dbo].[Questions](Question_ID)
 )
 
-CREATE TABLE USERTODT(
+CREATE TABLE dbo.USERTDOT(
 	Username Varchar(50) PRIMARY KEY NOT NULL,
 	Credit int, 
-	Email Varchar(60)
+	Email Varchar(60),
+	StartZeit Varchar(60)
 )
 
 INSERT INTO isAdmin VALUES('wuchered');
@@ -58,10 +59,10 @@ Insert into Questions  values ('7','Wie heisst das beste Spiel in Turnen?','7','
 Insert into Questions  values ('8','Ist LabView eine Programmiersprache?','8','3');
 Insert into Questions  values ('9','Wer entwickelte Sharepoint?','9','1');
 
-Insert into Answers values ('0','C#','0','1');
+Insert into Answers values ('0','C#','0','0');
 Insert into Answers values ('1','Java','0','0');
 Insert into Answers  values ('2','HTML','0','0');
-Insert into Answers  values ('3','Gobi','0','0');
+Insert into Answers  values ('3','Gobi','0','1');
 Insert into Answers  values ('4','483','1','0');
 Insert into Answers  values ('5','41','1','0');
 Insert into Answers  values ('6','3','1','0');
@@ -82,21 +83,20 @@ Insert into Answers  values ('20','Gut','5','0');
 Insert into Answers  values ('21','Manchmal','5','0');
 Insert into Answers  values ('22','Schlecht','5','0');
 Insert into Answers  values ('23','Nie','5','1');
-Insert into Answers  values ('24','Scrum','6','0');
+Insert into Answers  values ('24','Scrum','6','1');
 Insert into Answers  values ('25','Pflaume','6','0');
-Insert into Answers  values ('26','Sex','6','0');
-Insert into Answers  values ('27','Sex2','6','1');
+Insert into Answers  values ('26','Chum','6','0');
+Insert into Answers  values ('27','Wasserkreis','6','0');
 Insert into Answers  values ('28','Alles','7','1');
 Insert into Answers  values ('29','Floorball','7','0');
 Insert into Answers  values ('30','Fussball','7','0');
 Insert into Answers  values ('31','Tenis','7','0');
-Insert into Answers  values ('32','Nein','8','1');
+Insert into Answers  values ('32','Nein','8','0');
 Insert into Answers  values ('33','Ja','8','0');
-Insert into Answers  values ('34','kA','8','0');
-Insert into Answers  values ('35','Mal so, mal so','8','0');
-Insert into Answers  values ('36','xxx','9','0');
-Insert into Answers  values ('37','yyy','9','0');
-Insert into Answers  values ('38','Prof. Karasek','9','0');
-Insert into Answers  values ('39','1Stein','9','1');
+Insert into Answers  values ('34','keine Ahnung','8','0');
+Insert into Answers  values ('35','at least it tried','8','1');
+Insert into Answers  values ('36','Obama','9','0');
+Insert into Answers  values ('37','Microsoft','9','0');
+Insert into Answers  values ('38','Prof. Karasek','9','1');
+Insert into Answers  values ('39','1Stein','9','0');
 
-Insert into USERTODT values('dave', 100, '');

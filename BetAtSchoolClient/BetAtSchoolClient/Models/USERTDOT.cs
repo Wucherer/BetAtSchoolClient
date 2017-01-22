@@ -17,5 +17,6 @@ namespace BetAtSchoolClient.Models
         public string Username { get; set; }
         public Nullable<int> Credit { get; set; }
         public string Email { get; set; }
+        public string StartZeit { get; set; }
     }
 }
