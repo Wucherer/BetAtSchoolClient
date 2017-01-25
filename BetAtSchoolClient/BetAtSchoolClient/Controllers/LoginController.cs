@@ -14,25 +14,30 @@ namespace BetAtSchoolClient.Controllers
         // GET: Login
         public ActionResult Index()
         {
-            UserGuide ug = ch.getUser("s", "s");
+            HttpContext.Session.Add("error", "");
+            UserGuide ug = ch.getUser("SuperOverUser", "SuperOverUser");
             return View(ug);
         }
 
         public ActionResult returnUser(string username, string password)
         {
+
             UserGuide u = ch.getUser(username, password);
 
             HttpContext.Session.Add("currentGuide", u);
             
             string s = null;
-          
-            
-                if(u != null)
+            try
+            {
+
+                if (u != null)
                 {
                     if (ch.isAdmin(username))
                     {
                         return RedirectToAction("Index", "Admin");
-                    } else {
+                    }
+                    else
+                    {
                         if (HttpContext.Session["exception"] != null)
                         {
                             s = "../Login/Index";
@@ -47,7 +52,11 @@ namespace BetAtSchoolClient.Controllers
                 {
                     s = "../Login/Index";
                 }
-            
+            } catch(Exception e)
+            {
+                HttpContext.Session["error"] = "error in returnUser() - maybe GetUser() - " + "full msg: " + e.Message.ToString();
+                return RedirectToAction("Index", "Error");
+            }
                 
             return View(s, u);
         }

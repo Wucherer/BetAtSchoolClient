@@ -1,16 +1,4 @@
-﻿@{ 
-    List<string> ex = new List<string>();
-    if((HttpContext.Current.Session["exception"] as List<string>) != null)
-    {
-        ex = HttpContext.Current.Session["exception"] as List<string>;
-    }
-    else
-    {
-        ex.Add("no ex");
-    }
-}
-
-<script>
+﻿<script>
     var anfang = true;
 
     function btnLoginClick(e) {
@@ -45,12 +33,22 @@
 
     }
 </script>
+
 @{
     ViewBag.Title = "Index";
 
-        Layout = "~/Views/Shared/_Layout.cshtml";
-    
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string ex;
+    if ((HttpContext.Current.Session["exception"] as string) != null)
+    {
+        ex = HttpContext.Current.Session["exception"] as string;
+    }
+    else
+    {
+    }
+
 }
+
 <title>Login</title>
 
 <div id="Login-content" class="demo-section k-content">
@@ -68,10 +66,10 @@
     {
        HttpContext.Current.Session.Add("passwordWrong", "notSet");
        @Html.Kendo().Button().Name("btnSumbmit").Content("Login").Events(e => e.Click("btnLoginClick")) <label id="msgLogin"></label>
-
     }
 
 </div>
+
 <style>
     .demo-section {
         padding: 0;

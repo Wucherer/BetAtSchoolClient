@@ -14,7 +14,11 @@
 <script>
     var currQ = 0;
     var answeredQ = 0;
-    var score = 100;
+    var score = 10;
+    var min = 10;
+    var max = 10;
+    var checked = false;
+    
 
     $(document).ready(function () {
         var slider = $("#slider").kendoSlider({
@@ -23,10 +27,19 @@
             min: 10,
             max: score,
             smallStep: 10,
-            largeStep: 10
+            largeStep: 10,
         }).data("kendoSlider");
+
+        $("input[type='radio']").click(function () {
+            chkRadioClick();
+        });
     });
 
+
+    function chkRadioClick()
+    {
+        checked = true;
+    }
     function btnExitClick(e)
     {
         var username = $("#currentPlayer").text();
@@ -50,6 +63,7 @@
             if (next == 10) {
                 $("#btnAnswer").prop("disabled", true);
                 $("#btnNext").prop("disabled", true);
+
             }
 
             document.getElementById(currQ).style.display = 'none';
@@ -97,50 +111,66 @@
 
     function btnAnswerClick(e)
     {
-        //check img - if visible => disable answer
-        var img = "#img" + (currQ + 1);
-        var rightAnswer;
-        var value = $("#slider").data("kendoSlider").value();
+        if (checked == true) {
+            //check img - if visible => disable answer
+            var img = "#img" + (currQ + 1);
+            var rightAnswer;
+            var value = $("#slider").data("kendoSlider").value();
 
+            var correct = false;
 
+            var correctA = "#RA" + currQ;
+            var radio = "#A" + $(correctA).text();
 
-        var correctA = "#RA" + currQ;
-        var radio = "#A" + $(correctA).text();
+                if ($(radio).is(':checked')) {
+                    $(img).attr('src', '../../Images/check_circle.png');
 
-        if ($(radio).is(':checked')) {
-            $(img).attr('src', '../../Images/check_circle.png');
+                    var quoteId = "#Q" + (currQ + 1);
+                    var quoteVal = $(quoteId).text();
+                    score = score + (value * quoteVal);
 
-            var quoteId = "#Q" + (currQ + 1);
-            var quoteVal = $(quoteId).text();
-            score = score + (value * quoteVal);
+                    min = score / 6;
+                    max = score / 6;
+                    min = Math.round(min);
+                    max = Math.round(max);
+
+                    
+                    var nodes = document.getElementById(currQ).getElementsByTagName('*');
+                    for (var i = 0; i < nodes.length; i++) {
+                        nodes[i].disabled = true;
+                    }
+                } else {
+                    score = score - value;
+                }
+
+            $("#btnAnswer").attr("disabled", true);
+
+            score = score + 10;
+
+            var slider = $("#slider").data("kendoSlider");
+            var wrapper = slider.wrapper;
+            var element = slider.element;
+            slider.destroy();
+            wrapper.before(element.show());
+            wrapper.remove();
+            
+
+            var slider = $("#slider").kendoSlider({
+                increaseButtonTitle: "Right",
+                decreaseButtonTitle: "Left",
+                min: min,
+                max: score,
+                smallStep: min,
+                largeStep: max,
+            }).data("kendoSlider");
+
+            $(img).css("display", "inline");
+            answeredQ = answeredQ + 1;
+            checked = false;
+            document.getElementById("msglbl").style.display = 'none';
         } else {
-            score = score - value;
+            document.getElementById("msglbl").style.display  = 'inline';
         }
-
-        $("#btnAnswer").attr("disabled", true);
-
-        score = score + 10;
-
-        var slider = $("#slider").data("kendoSlider");
-        var wrapper = slider.wrapper;
-        var element = slider.element;
-        slider.destroy();
-        wrapper.before(element.show());
-        wrapper.remove();
-
-        var slider = $("#slider").kendoSlider({
-            increaseButtonTitle: "Right",
-            decreaseButtonTitle: "Left",
-            min: 10,
-            max: score,
-            smallStep: 10,
-            largeStep: 10
-        }).data("kendoSlider");
-
-
-
-        $(img).css("display", "inline");
-        answeredQ = answeredQ + 1;
     }
 </script>
 
@@ -282,7 +312,8 @@
                 </div>
                 <div id=10 style="display: none">
                     <ul>
-                        <li><h1 style="margin-top:50px;" id="answeredQ"></h1></li>
+                        <li style="margin-top:50px;" ><h1>Player: @currentPlayer.name</h1></li>
+                        <li><h1 id="answeredQ"></h1></li>
                         <li><h1 style="margin-bottom:50px;"id="score"></h1></li>
                         <li></li>
                     </ul>
@@ -290,15 +321,14 @@
             </div>
      );
     })
-
         <input id="slider" class="balSlider" value="0" />
         <br />
-        <p id="msgSlider" style="visibility: hidden; color: red">too much !</p>
         <div id="buttons">
             @Html.Kendo().Button().Name("btnPrev").Events(e => e.Click("btnPrevClick")).Content("Back")
             @Html.Kendo().Button().Name("btnAnswer").Events(e => e.Click("btnAnswerClick")).Content("Answer")
             @Html.Kendo().Button().Name("btnNext").Events(e => e.Click("btnNextClick")).Content("Next")
             @Html.Kendo().Button().Name("btnBeenden").Events(e => e.Click("btnExitClick")).Content("Beenden")
+            <p id="msglbl" style="display: none">Please select something !</p>
         </div>
     </div>
 
@@ -351,10 +381,18 @@
     li {
         list-style-type: none;
         padding:2px;
+        
     }
 
     #buttons {
         text-align: center;
+    }
+
+    #msglbl{
+        margin-top: 10px;
+        color: red;
+        
+        
     }
 
     #k-radio-label {
@@ -410,4 +448,9 @@
             display: none;
         }
        
+
+        .disabledbutton {
+    pointer-events: none;
+    opacity: 0.4;
+}
 </style>

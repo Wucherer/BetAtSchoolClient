@@ -1,0 +1,36 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+    string msg = HttpContext.Current.Session["error"] as string;
+}
+<script>
+    function btnBackToLoginClick(e) {
+        $.ajax(
+                {
+                    type: 'GET',
+                    url: '@Url.Action("Index", "Login")',
+                    success: function (result) {
+                        
+                        $("#body").html(result);
+                    }
+                });
+    }
+</script>
+<h2>Error occured !!!</h2>
+<p>Meassage: @msg</p>
+
+@Html.Kendo().Button().Name("btnGoBack").Content("< Back to Login >").Events(e => e.Click("btnBackToLoginClick")) <label id="msgLogin"></label>
+
+
+
+<style>
+    h2 {
+        font-size: larger;
+       color: red;
+    }
+    p {
+        font-size: medium;
+    }
+</style>
+

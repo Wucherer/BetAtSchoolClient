@@ -51,49 +51,77 @@ namespace BetAtSchoolClient.Controllers
             }
 
             string currStation = HttpContext.Session["currentStation"] as string;
-
-            return View(ch.getAll());
+            try
+            {
+                return View(ch.getAll());
+            } catch(Exception e)
+            {
+                HttpContext.Session["error"] = "error in QuestionView()- maybe GetAll() - " + "full msg: " + e.Message.ToString();
+                return RedirectToAction("Index", "Error");
+            }
         }
 
         public ActionResult setGame(string player, string email)
         {
-            string s = null;
-            if(ch.checkIfUserExists(player) != true)
+            try
             {
-                if (email == null) email = "default";
-                Player p = new Player(player, 100, email, DateTime.Now.ToShortTimeString()); 
-                HttpContext.Session.Add("currentPlayer", p);
-                ch.InsertUserInDB(player, email);
-                return RedirectToAction("QuestionView", "User");
-            } else
+                string s = null;
+                if (ch.checkIfUserExists(player) != true)
+                {
+                    if (email == null) email = "default";
+                    Player p = new Player(player, 10, email, DateTime.Now.ToShortTimeString());
+                    HttpContext.Session.Add("currentPlayer", p);
+                    ch.InsertUserInDB(player, email);
+                    return RedirectToAction("QuestionView", "User");
+                }
+                else
+                {
+                    return View("../User/Index");
+                }
+            }catch(Exception e)
             {
-                return View("../User/Index");
+                HttpContext.Session["error"] = "error in setGame() - " + "full msg: " + e.Message.ToString();
+                return RedirectToAction("Index", "Error");
             }
         }
 
         public ActionResult setScore(string betAmount, bool isCorrect)
         {
-            if(isCorrect == true)
+            try
             {
-                List<Station> allStations = HttpContext.Session["allStations"] as List<Station>;
-                var allQuestionsOfStation = allStations.Where(x => x.StationName == HttpContext.Session["currentStation"] as string).Select(x => x.Questions).ToList();
-                decimal q = allQuestionsOfStation[int.Parse(HttpContext.Session["currentQuestion"] as string)].Select(x => x.Quote).FirstOrDefault();
-                decimal newScore = decimal.Parse(betAmount) * q;
+                if (isCorrect == true)
+                {
+                    List<Station> allStations = HttpContext.Session["allStations"] as List<Station>;
+                    var allQuestionsOfStation = allStations.Where(x => x.StationName == HttpContext.Session["currentStation"] as string).Select(x => x.Questions).ToList();
+                    decimal q = allQuestionsOfStation[int.Parse(HttpContext.Session["currentQuestion"] as string)].Select(x => x.Quote).FirstOrDefault();
+                    decimal newScore = decimal.Parse(betAmount) * q;
 
-                ch.setScore((HttpContext.Session["currentPlayer"] as Player).name, newScore);
-            } else
+                    ch.setScore((HttpContext.Session["currentPlayer"] as Player).name, newScore);
+                }
+                else
+                {
+                    ch.setScore((HttpContext.Session["currentPlayer"] as Player).name, (HttpContext.Session["currentPlayer"] as Player).credit - decimal.Parse(betAmount));
+                }
+            } catch(Exception e)
             {
-                ch.setScore((HttpContext.Session["currentPlayer"] as Player).name, (HttpContext.Session["currentPlayer"] as Player).credit - decimal.Parse(betAmount));
+                HttpContext.Session["error"] = "error in setGame() - " + "full msg: " + e.Message.ToString();
+                return RedirectToAction("Index", "Error");
             }
             return RedirectToAction("QuestionView", "User");
         }
 
         public ActionResult setScoreOffline(string player, string score)
         {
-            decimal sc = decimal.Parse(score);
-            player = player.Split(':')[1];
-            ch.setScore(player, sc);
-
+            try
+            {
+                decimal sc = decimal.Parse(score);
+                player = player.Split(':')[1];
+                ch.setScore(player, sc);
+            } catch(Exception e)
+            {
+                HttpContext.Session["error"] = "error in setScoreOffline() - " + "full msg: " + e.Message.ToString();
+                return RedirectToAction("Index", "Error");
+            }
             return RedirectToAction("Index", "User");
         }
 
